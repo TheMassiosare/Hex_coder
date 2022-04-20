@@ -1,9 +1,6 @@
 #if defined(_WIN32) || defined(_WIN64)
 #include "Utils.h"
 
-#define WIN_WIDTH 145
-#define WIN_HEIGHT 32
-
 HANDLE std_handle, active_handle;
 CONSOLE_SCREEN_BUFFER_INFOEX std_info;
 
@@ -109,122 +106,99 @@ BOOL Return_To_Console()
 	return TRUE;
 }
 
-BOOL Process_Input()
+BOOL Process_Input(char* mem)
 {
-	INPUT_RECORD console_input;
-	LPDWORD events_read;
-	if (!ReadConsoleInput(
-		GetStdHandle(STD_INPUT_HANDLE),
-		&console_input,
-		1,
-		&events_read))
+	bool loop = TRUE;
+	while(loop)
 	{
-		printf("Unable to read from console\n");
-		printf("Error: %lu\n", GetLastError());
-	}
-
-	if (console_input.Event.KeyEvent.bKeyDown)
-	{
-		CONSOLE_SCREEN_BUFFER_INFO buffer_info;
-		if (!GetConsoleScreenBufferInfo(active_handle, &buffer_info))
+		INPUT_RECORD console_input;
+		LPDWORD events_read;
+		if (!ReadConsoleInput(
+			GetStdHandle(STD_INPUT_HANDLE),
+			&console_input,
+			1,
+			&events_read))
 		{
-			printf("Unable to read console information\n");
+			printf("Unable to read from console\n");
 			printf("Error: %lu\n", GetLastError());
-			return FALSE;
 		}
-		COORD new_pos = buffer_info.dwCursorPosition;
-		switch (console_input.Event.KeyEvent.wVirtualKeyCode)
+
+		if (console_input.Event.KeyEvent.bKeyDown)
 		{
-		case VK_ESCAPE:
-			if (!Return_To_Console())
+			CONSOLE_SCREEN_BUFFER_INFO buffer_info;
+			if (!GetConsoleScreenBufferInfo(active_handle, &buffer_info))
 			{
-				printf("Unable to return no original console\n");
-				return 1;
+				printf("Unable to read console information\n");
+				printf("Error: %lu\n", GetLastError());
+				return FALSE;
 			}
-			exit(1);
-		case VK_RETURN:
-			return FALSE;
-		case VK_RIGHT:
-			(buffer_info.dwCursorPosition.X - 5) % 9 == 0 ? new_pos.X++ : (new_pos.X += 8);
-			if (new_pos.X > 141)
+			COORD new_pos = buffer_info.dwCursorPosition;
+			switch (console_input.Event.KeyEvent.wVirtualKeyCode)
 			{
-				new_pos = (COORD){ 5, new_pos.Y + 2 * (buffer_info.dwCursorPosition.Y < 30) };
-			}
-			Set_Cursor_Pos(new_pos.X, new_pos.Y);
-			break;
-		case VK_LEFT:
-			(buffer_info.dwCursorPosition.X - 6) % 9 == 0 ? new_pos.X-- : (new_pos.X -= 9);
+			case VK_ESCAPE:
+				if (!Return_To_Console())
+				{
+					printf("Unable to return no original console\n");
+					return 1;
+				}
+				exit(1);
+			case VK_RETURN:
+				return FALSE;
+			case VK_RIGHT:
+				(buffer_info.dwCursorPosition.X - 5) % 9 == 0 ? new_pos.X++ : (new_pos.X += 8);
+				if (new_pos.X > 141)
+				{
+					new_pos = (COORD){ 5, new_pos.Y + 2 * (buffer_info.dwCursorPosition.Y < 30) };
+				}
+				Set_Cursor_Pos(new_pos.X, new_pos.Y);
+				break;
+			case VK_LEFT:
+				(buffer_info.dwCursorPosition.X - 6) % 9 == 0 ? new_pos.X-- : (new_pos.X -= 9);
 
-			if (buffer_info.dwCursorPosition.X <= 5)
-			{
-				new_pos = (COORD){ 140, new_pos.Y - 2 * (buffer_info.dwCursorPosition.Y > 0) };
+				if (buffer_info.dwCursorPosition.X <= 5)
+				{
+					new_pos = (COORD){ 140, new_pos.Y - 2 * (buffer_info.dwCursorPosition.Y > 0) };
+				}
+				Set_Cursor_Pos(new_pos.X, new_pos.Y);
+				break;
+			case VK_UP:
+				new_pos.Y > 0 ? (new_pos.Y -= 2) : (new_pos.Y = 30);
+				Set_Cursor_Pos(new_pos.X, new_pos.Y);
+				break;
+			case VK_DOWN:
+				new_pos.Y < 30 ? (new_pos.Y += 2) : (new_pos.Y = 0);
+				Set_Cursor_Pos(new_pos.X, new_pos.Y);
+				break;
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+			case 'A':
+			case 'B':
+			case 'C':
+			case 'D':
+			case 'E':
+			case 'F':
+				printf("%c", console_input.Event.KeyEvent.uChar.AsciiChar);
+				(buffer_info.dwCursorPosition.X - 5) % 9 == 0 ? new_pos.X++ : (new_pos.X += 8);
+				if (new_pos.X > 141)
+				{
+					new_pos = (COORD){ 5, new_pos.Y + 2 * (buffer_info.dwCursorPosition.Y < 30) };			
+				}
+				Set_Cursor_Pos(new_pos.X, new_pos.Y);
+				break;
+			default:
+				break;
 			}
-			Set_Cursor_Pos(new_pos.X, new_pos.Y);
-			break;
-		case VK_UP:
-			new_pos.Y > 0 ? (new_pos.Y -= 2) : (new_pos.Y = 30);
-			Set_Cursor_Pos(new_pos.X, new_pos.Y);
-			break;
-		case VK_DOWN:
-			new_pos.Y < 30 ? (new_pos.Y += 2) : (new_pos.Y = 0);
-			Set_Cursor_Pos(new_pos.X, new_pos.Y);
-			break;
-		case '0':
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-		case '5':
-		case '6':
-		case '7':
-		case '8':
-		case '9':
-		case 'A':
-		case 'B':
-		case 'C':
-		case 'D':
-		case 'E':
-		case 'F':
-			printf("%c", console_input.Event.KeyEvent.uChar.AsciiChar);
-			(buffer_info.dwCursorPosition.X - 5) % 9 == 0 ? new_pos.X++ : (new_pos.X += 8);
-			if (new_pos.X > 141)
-			{
-				new_pos = (COORD){ 5, new_pos.Y + 2 * (buffer_info.dwCursorPosition.Y < 30) };			
-			}
-			Set_Cursor_Pos(new_pos.X, new_pos.Y);
-			break;
-		default:
-			break;
 		}
 	}
 
-	return TRUE;
-}
-
-BOOL Set_Cursor_Pos(unsigned int x, unsigned int y)
-{
-	CONSOLE_SCREEN_BUFFER_INFO buffer_info;
-	if (!GetConsoleScreenBufferInfo(active_handle, &buffer_info))
-	{
-		printf("Unable to read console information\n");
-		printf("Error: %lu\n", GetLastError());
-		return FALSE;
-	}
-	if (!SetConsoleCursorPosition(
-		active_handle,
-		(COORD) {
-		Clamp(x, 5, WIN_WIDTH - 3), Clamp(y, 0, WIN_HEIGHT - 2)
-	}))
-	{
-		printf("Unable to set cursor position\n");
-		printf("Error: %lu\n", GetLastError());
-		return FALSE;
-	}
-		return TRUE;
-}
-
-BOOL Mem_Fill(unsigned char* mem)
-{
 	unsigned char pos = 0;
 	CHAR_INFO char_buffer[2];
 	SMALL_RECT area_to_read;
@@ -250,5 +224,28 @@ BOOL Mem_Fill(unsigned char* mem)
 	}
 	return TRUE;
 }
+
+BOOL Set_Cursor_Pos(unsigned int x, unsigned int y)
+{
+	CONSOLE_SCREEN_BUFFER_INFO buffer_info;
+	if (!GetConsoleScreenBufferInfo(active_handle, &buffer_info))
+	{
+		printf("Unable to read console information\n");
+		printf("Error: %lu\n", GetLastError());
+		return FALSE;
+	}
+	if (!SetConsoleCursorPosition(
+		active_handle,
+		(COORD) {
+		Clamp(x, 5, WIN_WIDTH - 3), Clamp(y, 0, WIN_HEIGHT - 2)
+	}))
+	{
+		printf("Unable to set cursor position\n");
+		printf("Error: %lu\n", GetLastError());
+		return FALSE;
+	}
+		return TRUE;
+}
+
 #endif
 

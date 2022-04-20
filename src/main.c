@@ -1,4 +1,5 @@
 #include "Utils.h"
+#include <string.h>
 #pragma warning(disable : 4996)
 
 int main(int argc, char** argv)
@@ -34,7 +35,7 @@ int main(int argc, char** argv)
 					printf("Default decimal value too large");
 					return 1;
 				}
-				default_val = (unsigned char)strtoul(argv[i], 0, 10);
+				default_val = (unsigned char)str_to_dec(argv[i], 3);
 				default_val = Clamp(default_val, 0, 0xFF);
 				break;
 			case 'h':
@@ -74,22 +75,18 @@ int main(int argc, char** argv)
 	for (i = 0; i < 256; i++)
 	{
 		printf("%02X:  ", i);
-		Change_Output_Color(t_color, 0);
+		Change_Output_Color(t_color, b_reset);
 		printf("%02X  ", default_val);
-		Change_Output_Color(t_blue | t_green | t_red, 0); 
+		Change_Output_Color(t_reset, b_reset); 
 		if ((i & 0x0F) == 0x0F) printf("\n\n");
 	}
+	Change_Output_Color(t_color, b_reset);
+	Set_Cursor_Pos(5, 0);
 
-	Change_Output_Color(t_color, 0);
-	Set_Cursor_Pos(0, 0);
-	while (Process_Input() == TRUE);
-	
 	unsigned char mem[256];
-	if (!Mem_Fill(mem))
-	{
-		printf("Error while writting to memory\n");
-		return 1;
-	}
+	for(i = 0; i < 256; i++)
+		mem[i] = default_val;
+	Process_Input(mem);
 
 	if (!Return_To_Console())
 	{

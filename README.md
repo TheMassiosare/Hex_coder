@@ -17,4 +17,7 @@ E.g.: -h 4F
 ### Console colors
 Hex_coder has three different colors for the memory values: red, blue and green.  
 If you'd like to have a specific color, you can use the -c *color* command to change it!  
-E.g.: -c blue
+E.g.: -c blue  
+  
+To exit without saving changes, press ESC on Windows and ESC + any key on Linux. To save
+changes and exit press Enter; this will generate *.hex* file ready to be uploaded to your 2764!
