@@ -108,7 +108,7 @@ BOOL Return_To_Console()
 
 BOOL Process_Input(char* mem)
 {
-	bool loop = TRUE;
+	BOOL loop = TRUE;
 	while(loop)
 	{
 		INPUT_RECORD console_input;
@@ -143,7 +143,7 @@ BOOL Process_Input(char* mem)
 				}
 				exit(1);
 			case VK_RETURN:
-				return FALSE;
+				loop = FALSE;
 			case VK_RIGHT:
 				(buffer_info.dwCursorPosition.X - 5) % 9 == 0 ? new_pos.X++ : (new_pos.X += 8);
 				if (new_pos.X > 141)

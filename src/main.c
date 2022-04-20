@@ -86,7 +86,14 @@ int main(int argc, char** argv)
 	unsigned char mem[256];
 	for(i = 0; i < 256; i++)
 		mem[i] = default_val;
-	Process_Input(mem);
+	
+	if (!Process_Input(mem))
+	{
+		Return_To_Console();
+		printf("Unable to process input\n");
+		printf("No files were generated\n");
+		return 1;
+	}
 
 	if (!Return_To_Console())
 	{
