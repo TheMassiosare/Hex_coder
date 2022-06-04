@@ -37,7 +37,7 @@ unsigned int str_to_dec(const char* str, int size)
 	unsigned int n = 0;
 	for(unsigned int i = 0; i < size; i++)
 	{
-		n += (str[i]-'0')*_pow(10, size-i-1);
+		n += (str[i] - '0')*_pow(10, size - i - 1);
 	}
 	return n;
 }

@@ -38,13 +38,13 @@ int getch();
 
 enum console_colors
 {
-	t_blue = 34,
-	t_green = 32,
-	t_red = 31,
 	t_reset = 0, 
-	b_blue = 44,
-	b_green = 42,
+	t_red = 31,
+	t_green = 32,
+	t_blue = 34,
 	b_red = 41,
+	b_green = 42,
+	b_blue = 44,
 	b_reset = 49
 };
 

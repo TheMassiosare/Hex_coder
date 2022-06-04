@@ -5,9 +5,7 @@
 int main(int argc, char** argv)
 {
 	/* TODO:
-		* Design for Linux
 		* Let the user select the targeted EEPROM (only 2764 for now)
-		* Bullet proof input commands
 	*/
 
 	char filename[128] = "a";
@@ -15,6 +13,15 @@ int main(int argc, char** argv)
 	unsigned char t_color = t_green;
 	for (unsigned int i = 1; i < argc; i++)
 	{
+		if(strlen(argv[i]) < 2 || (i + 2 > argc))
+		{
+			Change_Output_Color(t_red, b_reset);
+			printf("Invalid input argument: ");
+			Change_Output_Color(t_reset, b_reset);
+			printf("missing specification\n");
+			return 1;
+		}
+
 		if (argv[i][0] == '-')
 		{
 			switch (argv[i][1])
@@ -23,6 +30,9 @@ int main(int argc, char** argv)
 			case 'O':
 				if (strlen(argv[++i]) >= 128)
 				{
+					Change_Output_Color(t_red, b_reset);
+					printf("Input error: ");
+					Change_Output_Color(t_reset, b_reset);
 					printf("File name too long\n");
 					return 1;
 				}
@@ -30,19 +40,24 @@ int main(int argc, char** argv)
 				break;
 			case 'd':
 			case 'D':
-				if (strlen(argv[++i]) > 3)
+				if (strlen(argv[++i]) > 3 || str_to_dec(argv[i], strlen(argv[i])) > 255)
 				{
-					printf("Default decimal value too large");
+					Change_Output_Color(t_red, b_reset);
+					printf("Input error: ");
+					Change_Output_Color(t_reset, b_reset);
+					printf("default decimal value too large\n");
 					return 1;
 				}
-				default_val = (unsigned char)str_to_dec(argv[i], 3);
-				default_val = Clamp(default_val, 0, 0xFF);
+				default_val = (unsigned char)str_to_dec(argv[i], strlen(argv[i]));
 				break;
 			case 'h':
 			case 'H':
 				if (strlen(argv[++i]) > 2)
 				{
-					printf("Default hex value too large");
+					Change_Output_Color(t_red, b_reset);
+					printf("Input error: ");
+					Change_Output_Color(t_reset, b_reset);
+					printf("default hex value too large\n");
 					return 1;
 				}
 				default_val = str_to_hex(argv[i], 2);
@@ -58,7 +73,10 @@ int main(int argc, char** argv)
 					t_color = t_green;
 				break;
 			default:
-				printf("Invalid input argument\n");
+				Change_Output_Color(t_red, b_reset);
+				printf("Invalid input argument: ");
+				Change_Output_Color(t_reset, b_reset);
+				printf("unknown command\n");
 				return 1;
 				break;
 			}
